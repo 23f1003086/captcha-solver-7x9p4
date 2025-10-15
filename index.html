@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captcha Solver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        #solution {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Captcha Solver</h1>
+    <div id="captcha-container">
+        <img id="captcha-image" src="" alt="Captcha Image">
+    </div>
+    <div id="solution"></div>
+
+    <script>
+        async function solveCaptcha(imageUrl) {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const formData = new FormData();
+            formData.append('file', blob, 'captcha.png');
+
+            const apiResponse = await fetch('https://s23f1003086-llm-project-23f1003086.hf.space/solve-image', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await apiResponse.json();
+            return result.solution;
+        }
+
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        async function displayCaptcha() {
+            const url = getUrlParameter('url') || 'sample.png';
+            const captchaImage = document.getElementById('captcha-image');
+            captchaImage.src = url;
+
+            const solution = await solveCaptcha(url);
+            document.getElementById('solution').innerText = solution;
+        }
+
+        window.onload = function() {
+            displayCaptcha();
+        };
+    </script>
+</body>
+</html>
