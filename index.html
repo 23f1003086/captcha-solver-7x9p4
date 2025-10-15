@@ -24,13 +24,12 @@
 </head>
 <body>
     <h1>Captcha Solver</h1>
-    <div id="captcha-container">
-        <img id="captcha-image" src="" alt="Captcha Image">
-    </div>
+    <p>Enter the captcha URL as a query parameter (e.g., ?url=https://.../image.png)</p>
+    <img id="captchaImage" src="" alt="Captcha Image">
     <div id="solution"></div>
 
     <script>
-        async function solveCaptcha(imageUrl) {
+        async function fetchCaptchaSolution(imageUrl) {
             const response = await fetch(imageUrl);
             const blob = await response.blob();
             const formData = new FormData();
@@ -40,9 +39,18 @@
                 method: 'POST',
                 body: formData
             });
-
             const result = await apiResponse.json();
             return result.solution;
+        }
+
+        function displayCaptcha(url) {
+            const imgElement = document.getElementById('captchaImage');
+            imgElement.src = url;
+
+            setTimeout(async () => {
+                const solution = await fetchCaptchaSolution(url);
+                document.getElementById('solution').innerText = `Solved Captcha: ${solution}`;
+            }, 15000);
         }
 
         function getUrlParameter(name) {
@@ -50,18 +58,10 @@
             return urlParams.get(name);
         }
 
-        async function displayCaptcha() {
-            const url = getUrlParameter('url') || 'sample.png';
-            const captchaImage = document.getElementById('captcha-image');
-            captchaImage.src = url;
-
-            const solution = await solveCaptcha(url);
-            document.getElementById('solution').innerText = solution;
-        }
-
-        window.onload = function() {
-            displayCaptcha();
-        };
+        document.addEventListener('DOMContentLoaded', () => {
+            const captchaUrl = getUrlParameter('url') || 'sample.png';
+            displayCaptcha(captchaUrl);
+        });
     </script>
 </body>
 </html>
